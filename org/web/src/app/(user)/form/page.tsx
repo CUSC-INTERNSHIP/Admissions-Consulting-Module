@@ -79,7 +79,7 @@ const RegistrationForm: React.FC = () => {
       newErrors.fullName = 'Vui lòng nhập họ và tên';
     if (!formData.dob.trim())
       newErrors.dob = 'Vui lòng nhập ngày tháng năm sinh';
-    if (!formData.gender) newErrors.gender = 'Vui lòng chọn giới tính';
+    // if (!formData.gender) newErrors.gender = 'Vui lòng chọn giới tính';
 
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Vui lòng nhập số điện thoại thường dùng';
@@ -105,21 +105,9 @@ const RegistrationForm: React.FC = () => {
       newErrors.otherUserType = 'Vui lòng ghi rõ mục khác';
     }
 
-    if (formData.programsSelected.length === 0) {
-      newErrors.programsSelected =
-        'Vui lòng chọn ít nhất một chương trình đăng ký';
-    }
-
-    if (formData.infoSources.length === 0) {
-      newErrors.infoSources = 'Vui lòng chọn ít nhất một nguồn thông tin';
-    }
-
-    if (
-      formData.infoSources.includes('Khác') &&
-      !formData.otherInfoSource.trim()
-    ) {
-      newErrors.otherInfoSource = 'Vui lòng ghi rõ nguồn thông tin khác';
-    }
+    // if (formData.infoSources.length === 0) {
+    //   newErrors.infoSources = 'Vui lòng chọn ít nhất một nguồn thông tin';
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -167,12 +155,77 @@ const RegistrationForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      alert('Đăng ký thành công!');
-      console.log('Dữ liệu đăng ký:', formData);
-      // Xử lý gửi dữ liệu đi server ở đây
+
+    if (!validateForm()) {
+      alert('Dữ liệu không hợp lệ, vui lòng kiểm tra kỹ lại');
+      return; // Dừng gửi form nếu validation thất bại
+    }
+    let courseName = '';
+    let className = '';
+    if (typeof window !== 'undefined') {
+      const savedDataString = localStorage.getItem('formData');
+
+      if (savedDataString) {
+        const savedData = JSON.parse(savedDataString); // parse JSON thành object
+        courseName = savedData.courseName;
+        className = savedData.className;
+      }
+    }
+
+    const now = new Date();
+    try {
+      const response = await fetch('http://localhost:3000/api/submitform', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          student_name: formData.fullName,
+          date_of_birth: formData.dob,
+          gender: formData.gender,
+          email: formData.email,
+          phone_number: formData.phoneNumber,
+          zalo_phone: formData.zaloPhoneNumber,
+          link_facebook: formData.facebookLink,
+          current_education_level: formData.userType,
+          other_education_level_description: formData.otherUserType,
+          high_school_name: formData.highSchoolName,
+          city: formData.city,
+          source: formData.infoSources
+            .filter((src) => src !== 'Khác')
+            .join(', '),
+          current_status: 'No contact yet',
+          registration_date: now.toLocaleString(),
+          status_change_date: 'null',
+          student_created_at: 'null',
+          student_updated_at: 'null',
+          assigned_counselor_name: 'null',
+          assigned_counselor_email: 'null',
+          assigned_counselor_type: 'null',
+          interested_courses_details: courseName + '___' + className,
+          student_status_history: 'null',
+          last_consultation_date: 'null',
+          last_consultation_duration_minutes: 'null',
+          last_consultation_notes: 'null',
+          last_consultation_type: 'null',
+          last_consultation_status: 'Contact',
+          last_consultation_counselor_name: 'null',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Lỗi khi gửi dữ liệu');
+      }
+
+      const result = await response.json();
+      console.log('Phản hồi từ server:', result);
+
+      // Nếu muốn, bạn có thể chuyển trang hoặc reset form ở đây
+      // router.push('/thank-you'); hoặc setFormData(initialFormData);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -182,7 +235,7 @@ const RegistrationForm: React.FC = () => {
       className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-6 "
     >
       <h2 className="text-3xl font-bold mb-4">
-        📝 Đăng ký tổng hợp các chương trình đào tạo tại CUSC
+        📝 Đăng ký tư vấn chương trình đào tạo tại CUSC
       </h2>
 
       {/* I. Thông tin cá nhân */}
@@ -269,9 +322,9 @@ const RegistrationForm: React.FC = () => {
               </label>
             ))}
           </div>
-          {errors.gender && (
+          {/* {errors.gender && (
             <p className="text-red-600 text-sm mt-1">{errors.gender}</p>
-          )}
+          )} */}
         </div>
 
         {/* Số điện thoại thường dùng */}
@@ -386,16 +439,16 @@ const RegistrationForm: React.FC = () => {
       <fieldset className="border p-4 rounded">
         <legend className="font-semibold mb-2">II. Thông tin học tập</legend>
 
-        {/* Trường đang học/làm */}
+        {/* Trường đang học */}
         <div className="mb-4">
-          <label htmlFor="schoolOrWorkPlace" className="block font-medium">
-            Bạn đang học/làm tại trường (nếu có):
+          <label htmlFor="highSchoolName" className="block font-medium">
+            Tên trường đang học (nếu là học sinh/sinh viên):
           </label>
           <input
             type="text"
-            id="schoolOrWorkPlace"
-            name="schoolOrWorkPlace"
-            value={formData.schoolOrWorkPlace}
+            id="highSchoolName"
+            name="highSchoolName"
+            value={formData.highSchoolName}
             onChange={handleChange}
             className="w-full mt-1 p-2 border rounded border-gray-300"
           />
@@ -415,23 +468,7 @@ const RegistrationForm: React.FC = () => {
             className="w-full mt-1 p-2 border rounded border-gray-300"
           />
         </div>
-
-        {/* Tên trường THPT */}
-        <div className="mb-4">
-          <label htmlFor="highSchoolName" className="block font-medium">
-            Tên trường THPT (nếu là học sinh):
-          </label>
-          <input
-            type="text"
-            id="highSchoolName"
-            name="highSchoolName"
-            value={formData.highSchoolName}
-            onChange={handleChange}
-            className="w-full mt-1 p-2 border rounded border-gray-300"
-          />
-        </div>
       </fieldset>
-
       {/* IV. Bạn biết thông tin qua kênh nào */}
       <fieldset className="border p-4 rounded">
         <legend className="font-semibold mb-2">
@@ -465,29 +502,13 @@ const RegistrationForm: React.FC = () => {
             <span>Khác</span>
           </label>
         </div>
-
-        {formData.infoSources.includes('Khác') && (
-          <input
-            type="text"
-            name="otherInfoSource"
-            value={formData.otherInfoSource}
-            onChange={handleChange}
-            placeholder="Vui lòng ghi rõ"
-            className={`mt-2 w-full p-2 border rounded ${
-              errors.otherInfoSource ? 'border-red-500' : 'border-gray-300'
-            }`}
-          />
-        )}
-        {errors.infoSources && (
+        {/* {errors.infoSources && (
           <p className="text-red-600 text-sm mt-1">{errors.infoSources}</p>
-        )}
-        {errors.otherInfoSource && (
-          <p className="text-red-600 text-sm mt-1">{errors.otherInfoSource}</p>
-        )}
+        )} */}
       </fieldset>
 
       {/* V. Đồng ý nhận thông báo */}
-      <fieldset className="border p-4 rounded">
+      {/* <fieldset className="border p-4 rounded">
         <legend className="font-semibold mb-2">
           IV. Đồng ý nhận thông báo từ CUSC
         </legend>
@@ -504,7 +525,7 @@ const RegistrationForm: React.FC = () => {
             sự kiện, hoạt động cộng đồng, tuyển sinh, công nghệ…
           </span>
         </label>
-      </fieldset>
+      </fieldset> */}
 
       {/* Submit */}
       <div>
