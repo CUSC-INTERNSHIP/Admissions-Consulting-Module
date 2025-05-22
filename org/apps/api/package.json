@@ -70,5 +70,8 @@
         "command": "docker build -f apps/api/Dockerfile . -t api"
       }
     }
+  },
+  "dependencies": {
+    "yamljs": "^0.3.0"
   }
 }
