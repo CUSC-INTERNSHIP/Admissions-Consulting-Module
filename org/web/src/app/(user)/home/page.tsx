@@ -3,7 +3,6 @@
 // Trong component
 import { useRouter } from 'next/navigation';
 
-import Image from 'next/image';
 import React, { useState } from 'react'; // Bắt buộc phải import useState
 import data from './data.json';
 
