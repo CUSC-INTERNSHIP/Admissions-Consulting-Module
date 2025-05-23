@@ -174,6 +174,69 @@ const RegistrationForm: React.FC = () => {
       }
     }
 
+    // API gửi mail tự động
+    fetch('http://localhost:3000/api/sendemail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: formData.email,
+        subject: 'Cảm ơn bạn đã liên hệ với CUSC',
+        text: `Chào ${formData.fullName},
+
+CUSC xin chân thành cảm ơn bạn đã quan tâm và liên hệ với các khóa học của trung tâm.
+
+Chúng tôi đã nhận được yêu cầu của bạn và sẽ liên hệ lại trong thời gian sớm nhất trong khung giờ làm việc của trung tâm. Mong bạn vui lòng chú ý điện thoại và email để nhận được thông tin hỗ trợ nhanh chóng.
+
+Ngoài ra, bạn có thể liên hệ với chúng tôi qua Zalo để được tư vấn nhanh hơn.
+
+CUSC trân trọng cảm ơn.`,
+        html: `
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Thư cảm ơn từ CUSC</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <p>Chào <strong>${formData.fullName}</strong>,</p>
+
+        <p>
+          CUSC xin chân thành cảm ơn bạn đã quan tâm và liên hệ với các khóa học của trung tâm.
+        </p>
+
+        <p>
+          Chúng tôi đã nhận được yêu cầu của bạn và sẽ liên hệ lại trong thời gian sớm nhất trong khung giờ làm việc của trung tâm. Mong bạn vui lòng chú ý điện thoại và email để nhận được thông tin hỗ trợ nhanh chóng.
+        </p>
+
+        <p>
+          Ngoài ra, bạn có thể liên hệ với chúng tôi qua Zalo để được tư vấn nhanh hơn.
+        </p>
+ <img 
+          src="https://yu.ctu.edu.vn/images/upload/article/2020/03/0305-logo-ctu.png"
+          alt="Logo CUSC" 
+          style="margin-top: 20px; width: 200px; display: block;" 
+        />
+        <p>
+          CUSC trân trọng cảm ơn.
+        </p>
+
+       
+      </body>
+      </html>
+    `,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message) {
+          console.log('Success:', data.message);
+        } else if (data.error) {
+          console.error('Error:', data.error);
+        }
+      })
+      .catch((err) => console.error('Fetch error:', err));
+
+    // API gửi data đên BE
     const now = new Date();
     try {
       const response = await fetch('http://localhost:3000/api/submitform', {
