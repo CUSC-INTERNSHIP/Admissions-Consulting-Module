@@ -16,8 +16,8 @@ CORS(app)
 
 # =============== CONFIG AZURE COMPUTER VISION ===============
 
-AZURE_OCR_KEY = os.getenv("AZURE_OCR_KEY")
-AZURE_OCR_ENDPOINT = os.getenv("AZURE_OCR_ENDPOINT")
+AZURE_OCR_KEY = os.getenv("NEXT_PUBLIC_AZURE_OCR_KEY")
+AZURE_OCR_ENDPOINT = os.getenv("NEXT_PUBLIC_AZURE_OCR_ENDPOINT")
 
 # =============== HÀM TRÍCH XUẤT DỮ LIỆU ===============
 def extract_fields(raw_text):

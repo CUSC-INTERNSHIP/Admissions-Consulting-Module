@@ -8,6 +8,8 @@ import React, {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertButton } from '@/components/alertButton';
+import dotenv from 'dotenv';
+dotenv.config();
 
 interface FormData {
   fullName: string;
@@ -352,7 +354,7 @@ const RegistrationForm: React.FC = () => {
               Ngoài ra, bạn có thể liên hệ với chúng tôi qua Zalo để được tư vấn nhanh hơn.
             </p>
      <img
-              src="https://res.cloudinary.com/ddg26qnpq/image/upload/v1751284117/maQR_zujf7j.png"
+              src="${process.env.NEXT_PUBLIC_CUSC_QR_URL}"
               alt="ma QR"
               style="margin-top: 20px; width: 200px; display: block;"
             />
