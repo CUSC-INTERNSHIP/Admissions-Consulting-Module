@@ -644,7 +644,7 @@ const DetailViewerSheet = <TData extends Record<string, any>>({
       );
 
       closeRef.current?.click(); // 👈 Đóng sheet
-      window.location.reload();
+      // window.location.reload();
 
       if (!res.ok) throw new Error('Cập nhật thất bại');
     } catch (err) {}

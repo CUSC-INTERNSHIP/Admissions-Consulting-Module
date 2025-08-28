@@ -466,11 +466,14 @@ const columns: ColumnDef<ConsultingTableRow>[] = [
       // const isDroppeOut = row.original.current_status === 'Thôi học';
       // console.log(isOverdue);
       const formattedDate = row.original.last_consultation_date || 'Chưa có';
+      const currentStatusnew = row.original.current_status;
 
       return (
         <span
           className={`${
-            isOverdue
+            currentStatusnew === 'Thôi học'
+              ? 'line-through text-gray-500 dark:text-gray-400'
+              : isOverdue
               ? 'text-red-600 font-medium bg-red-50 px-2 py-1 rounded dark:text-red-400 dark:bg-red-950'
               : 'text-foreground'
           }
@@ -635,7 +638,7 @@ export function DataTable({
   const [open, setOpen] = React.useState(false);
 
   const table = useReactTable({
-    data: serverData, // Sử dụng dữ liệu trực tiếp từ props (đã được fetch theo trang)
+    data: serverData,
     columns,
     meta: {
       onUpdate: onUpdate, // Truyền prop onUpdate vào meta
@@ -1551,6 +1554,7 @@ function TableCellViewer({
       ) {
         setisError(true);
       } else if (isEditing) {
+        // Dang ky khoa hoc api
         await fetch('http://localhost:3000/api/updatedata/RegisterCourse', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1577,7 +1581,7 @@ function TableCellViewer({
       // }
 
       if (selectedCourses && selectedCourses.length > 0) {
-        // Không có khóa học nào được chọn
+        // Dang ky khia hoc quan tam api
         await fetch('http://localhost:3000/api/updatedata/InteresCourse', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1588,10 +1592,20 @@ function TableCellViewer({
             // bạn có thể thêm các trường khác nếu cần
           }),
         });
+        if (!filteredInterestedCourses) {
+          await fetch('http://localhost:3000/api/updatedata/StatusStudent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              student_id: Student_id,
+            }),
+          });
+        }
       }
 
       const hasChanged = assignedCounselorName !== countName;
       if (hasChanged) {
+        // Doi nguoi phu trach
         await fetch('http://localhost:3000/api/updatedata/AssignCounselor', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1698,6 +1712,43 @@ function TableCellViewer({
       !selectedCoursesRegister.includes(item) &&
       !enrolledCoursesDetails.includes(item)
   );
+
+  const getFilteredInterestedCourses = (
+    interested: string,
+    enrolled: string
+  ): string => {
+    if (!interested) return '';
+
+    const interestedArr = interested
+      .split(';\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const enrolledArr = enrolled
+      ? enrolled
+          .split(';\n')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+    // Lấy tên khóa học trước dấu "("
+    const enrolledNames = enrolledArr.map((e) => e.split('(')[0].trim());
+
+    // Lọc bỏ khóa học đã đăng ký
+    const filteredInterested = interestedArr.filter((i) => {
+      const courseName = i.split('(')[0].trim();
+      return !enrolledNames.includes(courseName);
+    });
+
+    return filteredInterested.join(';\n');
+  };
+
+  // Lọc ra danh sách quan tâm thực sự (loại bỏ cái đã đăng ký)
+  const filteredInterestedCourses = React.useMemo(() => {
+    return getFilteredInterestedCourses(
+      interestedCoursesDetails,
+      enrolledCoursesDetails
+    );
+  }, [interestedCoursesDetails, enrolledCoursesDetails]);
 
   const consultationStatusOptions = [
     { id: 'Scheduled', label: 'Đã lên lịch' },
@@ -2192,7 +2243,7 @@ function TableCellViewer({
                 <ExpandableTextField
                   label="Chi Tiết Khóa Học Quan Tâm"
                   id="interested_courses_details"
-                  content={interestedCoursesDetails}
+                  content={filteredInterestedCourses}
                   show={showInterestedCourses}
                   setShow={setShowInterestedCourses}
                   readOnly={true}

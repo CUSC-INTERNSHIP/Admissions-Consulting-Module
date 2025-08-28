@@ -16,6 +16,7 @@ import {
   addStudentStatusHistory,
   Addconsultationsessions,
   updateUserStatus,
+  UpdateStatusStudent,
 } from '../services/data.service';
 import type { studentenrollments_payment_status } from '@prisma/client';
 import { authenticateToken } from '../middlewares/auth.middleware';
@@ -225,6 +226,22 @@ export class DataUpdate {
 
       return jsend.success({
         message: 'Cập nhật thành công',
+      });
+    } catch (error) {
+      console.error(' assignCounselor error:', error);
+      return jsend.error('Đăng ký thất bại. Vui lòng thử lại.');
+    }
+  }
+
+  @Post('/StatusStudent')
+  async StatusStudent(@Body() formData: any) {
+    try {
+      const { student_id } = formData;
+
+      UpdateStatusStudent(student_id);
+
+      return jsend.success({
+        message: 'Đăng ký thành công',
       });
     } catch (error) {
       console.error(' assignCounselor error:', error);

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, ChangeEvent } from 'react';
+import ExcelJS from 'exceljs';
 
 type ExtractedData = {
   fullName: string;
@@ -228,13 +229,47 @@ export default function ImprovedOCRPage() {
     }
 
     try {
-      const response = await fetch('/api/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(extractedData),
-      });
+      const response = await fetch(
+        'http://localhost:3000/api/studentsave/excel',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(extractedData),
+        }
+      );
+
+      // const now = new Date();
+
+      // const response = await fetch(
+      //   'http://localhost:3000/api/uploadform/submitform',
+      //   {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify({
+      //       student_name: extractedData.fullName,
+      //       date_of_birth: '',
+      //       gender: '',
+      //       email: extractedData.email,
+      //       phone_number: extractedData.phone,
+      //       zalo_phone: extractedData.zalo,
+      //       link_facebook: '',
+      //       current_education_level: '',
+      //       other_education_level_description: '',
+      //       high_school_name: extractedData.school,
+      //       city: '',
+      //       source: '',
+      //       other_source_description: '',
+      //       registration_date: now.toLocaleString(),
+      //       interested_courses_details: extractedData.field,
+      //       notification_consent: '',
+      //       other_notification_consent_description: '',
+      //     }),
+      //   }
+      // );
 
       const result = await response.json();
 
@@ -249,6 +284,54 @@ export default function ImprovedOCRPage() {
       alert('❌ Gửi dữ liệu thất bại. Kiểm tra kết nối hoặc server.');
     }
   };
+
+  // const handleSave = async () => {
+  //   if (!extractedData) return alert('Chưa có dữ liệu để lưu.');
+  //   if (
+  //     !extractedData.fullName ||
+  //     !extractedData.phone ||
+  //     !extractedData.email
+  //   ) {
+  //     return alert(
+  //       'Thiếu thông tin bắt buộc: Họ tên, số điện thoại hoặc email.'
+  //     );
+  //   }
+
+  //   try {
+  //     // Tạo workbook Excel
+  //     const workbook = new ExcelJS.Workbook();
+  //     const sheet = workbook.addWorksheet('Thông tin học viên');
+
+  //     sheet.columns = [
+  //       { header: 'Họ và tên', key: 'fullName', width: 25 },
+  //       { header: 'Số điện thoại', key: 'phone', width: 15 },
+  //       { header: 'Zalo', key: 'zalo', width: 15 },
+  //       { header: 'Email', key: 'email', width: 25 },
+  //       { header: 'Trường', key: 'school', width: 25 },
+  //       { header: 'Ngành', key: 'field', width: 30 },
+  //     ];
+
+  //     sheet.addRow(extractedData);
+
+  //     // Xuất buffer rồi tải file
+  //     const buffer = await workbook.xlsx.writeBuffer();
+  //     const blob = new Blob([buffer], {
+  //       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //     });
+
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement('a');
+  //     a.href = url;
+  //     a.download = `student_info_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  //     a.click();
+  //     window.URL.revokeObjectURL(url);
+
+  //     alert('✅ Đã tải file Excel thành công!');
+  //   } catch (error) {
+  //     console.error('Lỗi xuất Excel:', error);
+  //     alert('❌ Xuất Excel thất bại.');
+  //   }
+  // };
 
   const updateExtractedData = (field: keyof ExtractedData, value: string) => {
     setExtractedData((prev) => (prev ? { ...prev, [field]: value } : prev));

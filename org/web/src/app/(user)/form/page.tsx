@@ -358,6 +358,12 @@ const RegistrationForm: React.FC = () => {
               alt="ma QR"
               style="margin-top: 20px; width: 200px; display: block;"
             />
+             <p>
+              hoặc có thể dùng đường link sau:
+            </p>
+              <a href="${process.env.NEXT_PUBLIC_CUSC_ZALO_LINK}" target="_blank" style="text-decoration: underline; color: blue;">
+                Link zalo
+              </a>
             <p>
               CUSC trân trọng cảm ơn.
             </p>

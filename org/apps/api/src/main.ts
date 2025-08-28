@@ -20,6 +20,7 @@ import { DataUpdate } from './controllers/updatedata.controller';
 import { StudentStatistical } from './controllers/statistical-data.controller';
 import { ExportWordController } from './controllers/exportword.controller';
 import { ChatboxController } from './controllers/chatbox.controller';
+import { StudentSaveController } from './controllers/student-save.controller';
 
 const host = process.env.HOST ?? 'localhost';
 const port = Number(process.env.PORT ?? 3000);
@@ -58,6 +59,7 @@ const app: Express = createExpressServer({
     StudentStatistical,
     ExportWordController,
     ChatboxController,
+    StudentSaveController,
   ],
   defaultErrorHandler: false,
 });

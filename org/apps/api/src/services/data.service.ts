@@ -1249,3 +1249,15 @@ export const getDataPDF = async (
   }));
   return result;
 };
+
+export const UpdateStatusStudent = async (student_id: number) => {
+  const result = await prisma.students.update({
+    where: { id: student_id },
+    data: {
+      current_status: 'Registered',
+      status_change_date: new Date(), // nên có để track thời điểm đổi status
+    },
+  });
+
+  return result;
+};
